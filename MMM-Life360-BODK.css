@@ -1,0 +1,10 @@
+.MMM-Life360-BODK .life360-bodk { --life360-gap: 10px; --life360-warning: #ffb454; text-align: left; max-width: 100%; }
+.MMM-Life360-BODK .life360-member { padding: var(--life360-gap) 0; border-bottom: 1px solid #333; overflow-wrap: anywhere; }
+.MMM-Life360-BODK .life360-member:last-child { border-bottom: 0; }
+.MMM-Life360-BODK .life360-name { font-weight: 600; }
+.MMM-Life360-BODK .life360-location { margin: 3px 0; }
+.MMM-Life360-BODK .life360-warning { color: var(--life360-warning); }
+.MMM-Life360-BODK .life360-map { width: 100%; margin-bottom: var(--life360-gap); background: #222; color: #111; }
+.MMM-Life360-BODK .life360-compact { --life360-gap: 4px; }
+.MMM-Life360-BODK .life360-compact .life360-name { font-size: 0.8em; }
+.MMM-Life360-BODK .leaflet-control-attribution { font-size: 9px; }

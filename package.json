@@ -1,0 +1,16 @@
+{
+  "name": "mmm-life360-bodk",
+  "version": "1.0.0",
+  "description": "Life360 circle members and places for MagicMirror²",
+  "main": "MMM-Life360-BODK.js",
+  "author": "BODK",
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "repository": { "type": "git", "url": "https://github.com/BravoOscarDK/MMM-Life360-BODK.git" },
+  "scripts": {
+    "test": "node --test",
+    "check": "node scripts/check.js",
+    "smoke": "node scripts/smoke-transport.js"
+  },
+  "dependencies": { "cycletls": "^2.0.5", "leaflet": "^1.9.4" }
+}

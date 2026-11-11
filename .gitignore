@@ -1,0 +1,10 @@
+node_modules/
+.venv/
+.tools/
+coverage/
+*.log
+.env
+.env.*
+config.local.*
+*token*.json
+.cache/
