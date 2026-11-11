@@ -18,7 +18,7 @@ Inspired by [maxbethge/MMM-Life360](https://github.com/maxbethge/MMM-Life360). T
 
 ## Installation
 
-The module is currently a local development repository. The following standard commands apply **after it has been published to the stated GitHub repository**; that remote is not created by this implementation:
+Run these commands on the device running MagicMirror²:
 
 ```sh
 cd ~/MagicMirror/modules
@@ -27,7 +27,7 @@ cd MMM-Life360-BODK
 npm install
 ```
 
-For a local checkout, copy the `MMM-Life360-BODK` directory into `~/MagicMirror/modules`, then run `npm install` there. Keep the folder name unchanged. Configure the module below and restart MagicMirror².
+Keep the folder name `MMM-Life360-BODK` unchanged. Configure the module below and restart MagicMirror².
 
 ## Configuration
 
@@ -113,7 +113,7 @@ English is always the default regardless of MagicMirror²'s global language. Set
 
 ## Updating
 
-After publication, update the installed checkout:
+Update the installed checkout:
 
 ```sh
 cd ~/MagicMirror/modules/MMM-Life360-BODK
@@ -121,7 +121,7 @@ git pull --ff-only
 npm install
 ```
 
-Restart MagicMirror² using your normal startup method. For an unpublished local copy, replace the module source with the updated version, preserve your external config/environment settings, then run `npm install` and restart.
+Restart MagicMirror² using your normal startup method. Your external configuration and environment settings are preserved.
 
 ## Troubleshooting
 
