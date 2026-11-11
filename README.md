@@ -8,6 +8,14 @@ A **circle** is a Life360 group, not a geographic area. The module shows its mem
 
 Inspired by [maxbethge/MMM-Life360](https://github.com/maxbethge/MMM-Life360). This is an **experimental integration using an unofficial API**. Live authentication and device behavior have not been validated. Life360 can change or block access; a valid token does not guarantee API access. See [NOTICE](NOTICE) for upstream attribution.
 
+### Preview
+
+Default list layout with fictional members, places and battery readings. The optional map is disabled. English is the default language.
+
+![Life360 example with fictional data](docs/images/example.png)
+
+The [browser preview](docs/preview.html) uses fictional data only; it does not validate external services or hardware.
+
 ## Requirements
 
 - A working MagicMirror² installation and a Node.js version supported by that installation, at least Node.js 22.
