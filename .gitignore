@@ -8,3 +8,13 @@ coverage/
 config.local.*
 *token*.json
 .cache/
+
+# Local agent instructions and editor settings
+AGENTS.md
+AGENTS.override.md
+CLAUDE.md
+.codex/
+.agents/
+.claude/
+.vscode/
+.idea/
