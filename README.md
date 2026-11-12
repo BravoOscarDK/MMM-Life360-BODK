@@ -48,7 +48,9 @@ Insert this object into the `modules` array in `~/MagicMirror/config/config.js`:
   header: "Life360",
   config: {
     language: "en",
-    accessTokenEnv: "LIFE360_ACCESS_TOKEN",
+    accessToken: "YOUR_LIFE360_ACCESS_TOKEN",
+    baseUrl: "https://api.life360.com",
+    useImpersonation: true,
     circleIds: [],
     showMap: false,
     showCircle: true,
@@ -59,23 +61,44 @@ Insert this object into the `modules` array in `~/MagicMirror/config/config.js`:
 },
 ```
 
-### Authentication and circle IDs
+### Getting an access token
 
-The recommended configuration reads `LIFE360_ACCESS_TOKEN` from the **MagicMirror² server process environment**. Set it in your shell or process manager before starting MagicMirror². Restart the server after changing it. Different instances can use different environment variable names. Tokens read this way remain on the server; direct `accessToken` values in MagicMirror² config can be exposed to its browser and take precedence over the environment variable.
+Set `accessToken` directly in the module's `config` object as shown above. Replace `YOUR_LIFE360_ACCESS_TOKEN` with the token value only, without a `Bearer ` prefix. No environment variable is needed for this setup. Each module instance can have its own token.
 
-This module does not implement password login, email-code login, token refresh or token persistence. Sign in to your own account using Life360's website and its normal authentication flow. In your browser's Developer Tools, inspect Network requests for an OAuth token response (`access_token`) or an authenticated API request (`Authorization: Bearer …`). Copy only the token value into your local server environment. Do not share the token, logs containing it, or screenshots of it. The exact web flow may change. The reference project's [token instructions](https://github.com/maxbethge/MMM-Life360#getting-an-access-token) provide additional guidance, but are not a guarantee of working access.
+Use the browser method described in the [reference project's token instructions](https://github.com/maxbethge/MMM-Life360#getting-an-access-token). It also supports accounts that sign in with an emailed code:
+
+1. Open [Life360 login](https://life360.com/login) in your browser.
+2. Open Developer Tools (`F12`, or right-click and select **Inspect**) and select the **Network** tab. Ensure recording is enabled before signing in.
+3. Sign in to your own account using its normal password or emailed-code flow. Keep Developer Tools open.
+4. Filter the network requests by `token`. Find the `POST` request whose URL ends in `/oauth2/token` (the full path may include `/v3`).
+5. Open its **Response** or **Preview** tab and copy the value of `access_token`, without the surrounding quotes. If that response is not available, inspect an authenticated Life360 API request and copy only the value after `Bearer ` in its `Authorization` request header.
+6. Test the token on the device running MagicMirror²:
+
+   ```sh
+   cd ~/MagicMirror/modules/MMM-Life360-BODK
+   node diagnose.js --token
+   ```
+
+7. Paste the token at the prompt. Input is visible locally. A `SUCCESS` result means that host/transport can retrieve your circles. If CycleTLS succeeds and fetch gets HTTP 403, use `useImpersonation: true`; the fetch failure does not invalidate the successful CycleTLS test. Use the successful `baseUrl` printed by the diagnostic.
+8. Paste the same token into `accessToken` in `~/MagicMirror/config/config.js`, apply the working host/transport settings, save the file and fully restart the MagicMirror² server process. Reloading the browser alone does not reload the server configuration.
+
+**The diagnostic does not save the token or configure the module.** A successful diagnostic followed by a missing-token configuration warning means you still need to put the token in the module configuration.
+
+This module does not implement password login, email-code login, automatic token refresh or a token cache, and does not include the reference project's `get-token.js`. If the token is rejected or revoked, repeat the browser steps, replace `accessToken` and restart MagicMirror². The website and authentication flow can change; these steps do not guarantee access.
+
+Keep your configuration private: a token grants account access and direct `accessToken` values in MagicMirror² configuration can be exposed to its browser. Never commit a real token or share screenshots, configuration files or logs containing it.
+
+### Circle and member IDs
 
 To restrict circles, inspect the authenticated `/v3/circles` response in the same browser session and copy the desired `id` values into `circleIds`. Member IDs are available in `/v3/circles/<circle-id>/members`. Empty arrays select all accessible circles/members. Members appearing in several selected circles are shown once, with all circle names and their newest available shared location. An explicitly selected but unavailable circle produces a configuration warning.
-
-Alternatively set `accessToken: "YOUR_LIFE360_ACCESS_TOKEN"` in local configuration. Never commit a real token. A rejected token requires a new token and a restart; the module does not automatically log in or bypass an interactive challenge.
 
 ### Options
 
 | Option | Default | Description |
 | --- | --- | --- |
 | `language` | `"en"` | English or Danish; regional codes supported; unsupported/empty codes use English |
-| `accessToken` | `""` | Explicit token; otherwise use the environment variable |
-| `accessTokenEnv` | `"LIFE360_ACCESS_TOKEN"` | Server environment variable name; `""` disables environment lookup |
+| `accessToken` | `""` | Paste your captured token here; used by the setup above and takes precedence over environment lookup |
+| `accessTokenEnv` | `"LIFE360_ACCESS_TOKEN"` | Optional alternative for environment-based setups; unnecessary when `accessToken` is set; `""` disables environment lookup |
 | `baseUrl` | `"https://api.life360.com"` | Other supported host: `https://api-cloudfront.life360.com` |
 | `useImpersonation` | `true` | Use CycleTLS browser TLS transport; `false` uses native Node fetch |
 | `circleIds` | `[]` | Include selected circle IDs; empty means all |
@@ -139,8 +162,8 @@ Run `node diagnose.js --token` from the module folder and paste your captured to
 
 The diagnostic tests `/v3/circles` once per supported host and transport (CycleTLS and native fetch), using the module's actual transport and timeouts. It prints success counts or error categories and suggests `baseUrl` and `useImpersonation` when a combination works. It stops immediately on rate limiting. Exit code 0 means at least one combination succeeded; 1 means failure, rate limiting or invalid input. It does not print tokens, response bodies, circle names or locations, or write data to disk. Unlike the upstream diagnostic, it tests captured tokens only; password login is not supported. A successful circles request does not validate member locations or the display on your target device.
 
-- **Configuration warning:** supply a token; check ID arrays, supported HTTPS host, and interval/timeout ranges. Configuration is validated before API requests start.
-- **401/token rejected:** capture a new token, update the server environment or local config, and restart. Automatic polling stops for this error.
+- **Missing-token configuration warning:** set `accessToken` inside this module's `config` object in `~/MagicMirror/config/config.js` and fully restart MagicMirror². A token pasted into `diagnose.js` is not saved for the module. For other configuration warnings, check ID arrays, supported HTTPS host, and interval/timeout ranges. Configuration is validated before API requests start.
+- **401/token rejected:** capture a new token, replace `accessToken` in local configuration, and restart. Automatic polling stops for this error.
 - **403/access blocked:** access may be rejected by Life360 or its protection service. Check the default CycleTLS transport and target platform. You can try the other supported API host; success is not guaranteed. Polling stops to avoid repeated blocked requests. Restart after correcting settings.
 - **429/network/server failure:** polling backs off exponentially, capped at 30 minutes, and stops after five consecutive failures. A message tells you when updates stop; check access and restart. There is no immediate retry loop. Polls never overlap within an instance.
 - **No people or place names:** check circle/member filters, account access and sharing in Life360. Empty selected circles are valid. A named place appears only when upstream reports it; there is no local geofence engine or reverse geocoding.
