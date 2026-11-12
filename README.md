@@ -133,6 +133,12 @@ Restart MagicMirror² using your normal startup method. Your external configurat
 
 ## Troubleshooting
 
+### Token diagnostics
+
+Run `node diagnose.js --token` from the module folder and paste your captured token at the prompt (input is visible in your local terminal). Alternatively, set `LIFE360_ACCESS_TOKEN` in that shell and run `node diagnose.js`; `LIFE360_TOKEN` is also accepted. The command does not read MagicMirror² configuration or another process's environment. Run `node diagnose.js --help` for usage.
+
+The diagnostic tests `/v3/circles` once per supported host and transport (CycleTLS and native fetch), using the module's actual transport and timeouts. It prints success counts or error categories and suggests `baseUrl` and `useImpersonation` when a combination works. It stops immediately on rate limiting. Exit code 0 means at least one combination succeeded; 1 means failure, rate limiting or invalid input. It does not print tokens, response bodies, circle names or locations, or write data to disk. Unlike the upstream diagnostic, it tests captured tokens only; password login is not supported. A successful circles request does not validate member locations or the display on your target device.
+
 - **Configuration warning:** supply a token; check ID arrays, supported HTTPS host, and interval/timeout ranges. Configuration is validated before API requests start.
 - **401/token rejected:** capture a new token, update the server environment or local config, and restart. Automatic polling stops for this error.
 - **403/access blocked:** access may be rejected by Life360 or its protection service. Check the default CycleTLS transport and target platform. You can try the other supported API host; success is not guaranteed. Polling stops to avoid repeated blocked requests. Restart after correcting settings.

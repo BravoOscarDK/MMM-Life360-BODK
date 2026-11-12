@@ -4,7 +4,7 @@ const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const vm = require("node:vm");
 const root = path.resolve(__dirname, "..");
-const files = ["MMM-Life360-BODK.js", "node_helper.js", "translations.js",
+const files = ["MMM-Life360-BODK.js", "node_helper.js", "translations.js", "diagnose.js",
   ...["lib", "scripts", "test"].flatMap(dir => fs.readdirSync(path.join(root, dir)).filter(name => name.endsWith(".js")).map(name => `${dir}/${name}`))];
 for (const file of files) {
   const result = spawnSync(process.execPath, ["--check", path.join(root, file)], { encoding: "utf8" });
