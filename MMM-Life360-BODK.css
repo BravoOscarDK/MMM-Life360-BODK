@@ -1,4 +1,6 @@
-.MMM-Life360-BODK .life360-bodk { --life360-gap: 10px; --life360-warning: #ffb454; text-align: left; max-width: 100%; }
+.MMM-Life360-BODK .module-header { border-bottom: 0; }
+.MMM-Life360-BODK .life360-bodk { --life360-gap: 10px; --life360-warning: #ffb454; color: #ddd; text-align: left; max-width: 100%; }
+.MMM-Life360-BODK .life360-bodk .dimmed { color: #ccc; }
 .MMM-Life360-BODK .life360-member { padding: var(--life360-gap) 0; border-bottom: 1px solid #333; overflow-wrap: anywhere; }
 .MMM-Life360-BODK .life360-member:last-child { border-bottom: 0; }
 .MMM-Life360-BODK .life360-name { font-weight: 600; }

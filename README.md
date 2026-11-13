@@ -10,7 +10,7 @@ Inspired by [maxbethge/MMM-Life360](https://github.com/maxbethge/MMM-Life360). T
 
 ### Preview
 
-Default list layout with fictional members, places and battery readings. The optional map is disabled. English is the default language.
+Default list layout with brighter text and no divider below the module heading, using fictional members, places and battery readings. The optional map is disabled. English is the default language.
 
 ![Life360 example with fictional data](docs/images/example.png)
 
