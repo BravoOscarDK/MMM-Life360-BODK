@@ -108,6 +108,14 @@ test("native transport uses bearer header, forbids redirects and applies abort s
   controller.abort();
   await assert.rejects(transport.get(config(), "/v3/circles", controller.signal), { name: "AbortError" });
 });
+test("CycleTLS initialization can recover after failure", async () => {
+  const transport = new Transport(); let calls = 0;
+  const client = { exit: async () => {} };
+  transport.openCycle = async () => { if (++calls === 1) throw new Error("offline"); return client; };
+  await assert.rejects(transport.cycle());
+  assert.equal(await transport.cycle(), client);
+  await transport.close();
+});
 
 class Element {
   constructor() { this.children = []; this.style = {}; this.className = ""; this.textContent = ""; }
@@ -217,17 +225,33 @@ test("backend rejects config without API work and stops retrying rejected tokens
   assert.equal(messages.at(-1).payload.error, "auth"); assert.equal(messages.at(-1).payload.retryStopped, true);
   app.stop();
 });
-test("backend backs off and stops after five consecutive failures", async () => {
-  const { app, messages, timers } = helper(async () => { throw new Error("private API details"); });
+test("backend continues after repeated network failures and recovers", async () => {
+  let attempts = 0;
+  const { app, messages, timers } = helper(async () => {
+    if (++attempts <= 8) throw new Error("private API details");
+    return { circles: [] };
+  });
   app.socketNotificationReceived("LIFE360_CONFIG", { id: "a", config: { accessToken: "example" } });
   await flush();
   assert.equal([...timers.values()][0].delay, 120000);
-  for (let i = 1; i < 5; i++) {
+  for (let i = 1; i <= 8; i++) {
     const [id, timer] = [...timers.entries()][0]; timers.delete(id); timer.fn(); await flush();
   }
-  assert.equal(messages.length, 5); assert.equal(timers.size, 0);
-  assert.equal(messages.at(-1).payload.retryStopped, true);
+  assert.equal(messages.length, 9); assert.equal(timers.size, 1);
+  assert.equal(messages.at(-1).payload.error, null);
+  assert.equal([...timers.values()][0].delay, 60000);
   assert.doesNotMatch(JSON.stringify(messages), /private API details|example/);
+  app.stop();
+});
+test("rate limiting continues with a longer capped delay", async () => {
+  const { app, timers, messages } = helper(async () => { throw apiError(429); });
+  app.socketNotificationReceived("LIFE360_CONFIG", { id: "a", config: { accessToken: "example" } });
+  await flush();
+  for (let i = 0; i < 7; i++) {
+    const [id, timer] = [...timers.entries()][0]; timers.delete(id); timer.fn(); await flush();
+  }
+  assert.equal([...timers.values()][0].delay, 1800000);
+  assert.equal(messages.at(-1).payload.retryStopped, false);
   app.stop();
 });
 test("late results after suspension or reconfiguration are discarded", async () => {

@@ -39,19 +39,21 @@ module.exports = NodeHelper.create({
       const members = await session.client.load(session.controller.signal);
       if (this.sessions.get(id) !== session) return;
       session.failures = 0;
+      session.lastError = null;
       this.sendSocketNotification("LIFE360_STATUS", { id, members, updated: Date.now(), error: null, retryStopped: false });
     } catch (error) {
       if (this.sessions.get(id) !== session) return;
       session.failures++;
       const code = ["auth", "blocked", "rateLimited", "circleMissing"].includes(error.code) ? error.code : "unavailable";
+      session.lastError = code;
       terminal = ["auth", "blocked", "circleMissing"].includes(code);
-      if (session.failures >= 5) terminal = true;
       // Never log API bodies, credentials, names or locations.
       console.warn(`[MMM-Life360-BODK] Request failed: ${code}. ${terminal ? "Update configuration and restart." : "Retrying with backoff."}`);
       this.sendSocketNotification("LIFE360_STATUS", { id, error: code, retryStopped: terminal });
     }
     if (!terminal && this.sessions.get(id) === session) {
-      const delay = Math.min(1800000, session.config.updateInterval * 2 ** Math.min(session.failures, 5));
+      const cap = session.lastError === "rateLimited" ? 1800000 : Math.max(300000, session.config.updateInterval);
+      const delay = Math.min(cap, session.config.updateInterval * 2 ** Math.min(session.failures, 5));
       session.timer = setTimeout(() => void this.poll(id, session), delay);
     }
   }
